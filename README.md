@@ -75,7 +75,10 @@ instala el APK.
 _Pendiente._
 
 ### 3. Onboarding con PIN y desbloqueo biométrico ⬜
-_Pendiente._
+- **Estado persistente del secure-store:** durante el desarrollo, un PIN de una
+  prueba anterior sobrevivió a reinstalaciones parciales de la app, causando
+  fallos de validación hasta desinstalar por completo. Es la contracara de que
+  el secure-store sea persistente por diseño.
 
 ### 4. Par de claves en secure-store ⬜
 _Pendiente._
