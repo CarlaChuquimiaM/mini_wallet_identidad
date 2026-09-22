@@ -1,23 +1,32 @@
 import { createContext, ReactNode, useContext, useState } from "react";
+
 type SesionContextType = {
   haySesion: boolean;
-  entrar: () => void;
+  pin: string | null;
+  entrar: (pin?: string) => void;
   salir: () => void;
 };
+
 const SesionContext = createContext<SesionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [haySesion, setHaySesion] = useState(false);
-  const entrar = () => {
-    console.log("entrar() se ejecutó, haySesion pasa a true");
+  const [pin, setPin] = useState<string | null>(null);
+
+  const entrar = (pinIngresado?: string) => {
+    if (pinIngresado) {
+      setPin(pinIngresado);
+    }
     setHaySesion(true);
   };
+
   const salir = () => {
-    console.log("salir() se ejecutó, haySesion pasa a false");
+    setPin(null);
     setHaySesion(false);
   };
+
   return (
-    <SesionContext.Provider value={{ haySesion, entrar, salir }}>
+    <SesionContext.Provider value={{ haySesion, pin, entrar, salir }}>
       {children}
     </SesionContext.Provider>
   );

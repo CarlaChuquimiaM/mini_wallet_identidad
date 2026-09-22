@@ -33,14 +33,13 @@ export default function Login() {
 
   const manejarCrearPin = async () => {
     await guardarPin(pin);
-    entrar();
+    entrar(pin);
   };
 
   const manejarValidarPin = async () => {
-    const ok = await verificarPin(pin);
-    if (ok) {
-      setError("");
-      entrar();
+    const verficaPin = await verificarPin(pin);
+    if (verficaPin) {
+      entrar(pin);
     } else {
       setError("PIN incorrecto");
       setPin("");
@@ -81,8 +80,6 @@ export default function Login() {
         placeholderTextColor="#999"
         style={{
           borderWidth: 2,
-          borderColor: "red",
-          backgroundColor: "white",
           color: "black",
           padding: 12,
           width: 150,

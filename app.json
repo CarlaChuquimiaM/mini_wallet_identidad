@@ -34,7 +34,19 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Permite acceder a tus datos de identidad protegidos."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite escanear códigos QR de credenciales."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -87,7 +87,12 @@ _Pendiente._
 _Pendiente._
 
 ### 6. Cifrado de datos de identidad ⬜
-_Pendiente._
+- **Autenticar ≠ tener la clave:** la biometría confirma la identidad pero no
+  entrega el PIN, así que no puede descifrar por sí sola. Si el usuario entra
+  con huella, se le pide el PIN al acceder a datos cifrados. Esta distinción
+  guía todo el diseño de la característica 6.
+- **requireAuthentication opera a nivel de Keystore, no de sesión:** exige
+  biometría en cada acceso al dato, aunque el usuario ya haya iniciado sesión.
 
 ### 7. Operación offline con reintento idempotente ⬜
 _Pendiente._
