@@ -3,10 +3,10 @@
     "name": "mini-wallet-identidad",
     "slug": "mini-wallet-identidad",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "miniwalletidentidad",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },

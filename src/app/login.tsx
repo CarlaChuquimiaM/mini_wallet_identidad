@@ -20,7 +20,6 @@ export default function Login() {
   useEffect(() => {
     existePin().then(setTienePin);
   }, []);
-  console.log("tienePin =", tienePin);
 
   const { haySesion, entrar } = useSession();
 
@@ -79,12 +78,13 @@ export default function Login() {
         placeholder="PIN"
         placeholderTextColor="#999"
         style={{
-          borderWidth: 2,
+          borderWidth: 1,
           color: "black",
           padding: 12,
           width: 150,
           textAlign: "center",
           fontSize: 18,
+          borderRadius: 8,
         }}
       />
 

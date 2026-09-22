@@ -33,12 +33,12 @@ export async function procesarPendientes(): Promise<string[]> {
   const procesadas = await obtenerProcesadas();
   const registro: string[] = [];
 
-  for (const op of pendientes) {
-    if (procesadas.includes(op.id)) {
+  for (const operacion of pendientes) {
+    if (procesadas.includes(operacion.id)) {
       continue;
     }
-    registro.push(`✅ ${op.descripcion}`);
-    procesadas.push(op.id);
+    registro.push(`Procesada: ${operacion.descripcion} (id: ${operacion.id})`);
+    procesadas.push(operacion.id);
   }
 
   await AsyncStorage.setItem(CLAVE_PROCESADAS, JSON.stringify(procesadas));
