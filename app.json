@@ -8,7 +8,8 @@
     "scheme": "miniwalletidentidad",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.miniwalletidentidad"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +19,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.miniwalletidentidad"
+      "package": "com.anonymous.miniwalletidentidad",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",

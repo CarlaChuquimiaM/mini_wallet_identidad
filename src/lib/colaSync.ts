@@ -37,7 +37,7 @@ export async function procesarPendientes(): Promise<string[]> {
     if (procesadas.includes(operacion.id)) {
       continue;
     }
-    registro.push(`Procesada: ${operacion.descripcion} (id: ${operacion.id})`);
+    registro.push(`${operacion.descripcion} - id: ${operacion.id}`);
     procesadas.push(operacion.id);
   }
 

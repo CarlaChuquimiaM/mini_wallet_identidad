@@ -1,11 +1,19 @@
 import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 import { useSession } from "@/context/SessionContext";
+import { useTheme } from "@/hooks/use-theme";
 import { guardarIdentidad } from "@/lib/almacenIdentidad";
 import { validarCredencial, type Credencial } from "@/lib/credencial";
 import { verificarPin } from "@/lib/pin";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
-import { Button, StyleSheet, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function Escanear() {
   const [permiso, pedirPermiso] = useCameraPermissions();
@@ -15,27 +23,23 @@ export default function Escanear() {
   const { pin } = useSession();
   const [textoCifrado, setTextoCifrado] = useState("");
   const [guardado, setGuardado] = useState(false);
-
   const [pidiendoPin, setPidiendoPin] = useState(false);
   const [pinTemporal, setPinTemporal] = useState("");
-  if (!permiso) {
-    return <View />;
-  }
-  if (!permiso.granted) {
-    return (
-      <View style={styles.centro}>
-        <ThemedText>
-          Necesitamos permiso para usar la cámara para el escaneer del QR
-        </ThemedText>
-        <Button title="Dar permiso" onPress={pedirPermiso} />
-      </View>
-    );
-  }
+  const theme = useTheme();
+
+  const reiniciar = () => {
+    setEscaneado(false);
+    setCredencial(null);
+    setError("");
+    setGuardado(false);
+    setPidiendoPin(false);
+    setPinTemporal("");
+    setTextoCifrado("");
+  };
 
   const escanear = ({ data }: { data: string }) => {
     if (escaneado) return;
     setEscaneado(true);
-
     const resultado = validarCredencial(data);
     if (resultado.ok) {
       setCredencial(resultado.datos);
@@ -60,7 +64,6 @@ export default function Escanear() {
 
   const guardarCredencial = async () => {
     if (!credencial) return;
-
     if (!pin) {
       setPidiendoPin(true);
       return;
@@ -77,6 +80,26 @@ export default function Escanear() {
     }
   };
 
+  if (!permiso) {
+    return <View style={{ flex: 1 }} />;
+  }
+
+  if (!permiso.granted) {
+    return (
+      <View style={styles.centro}>
+        <ThemedText style={{ textAlign: "center" }}>
+          Necesitamos permiso para usar la cámara y escanear el QR
+        </ThemedText>
+        <Pressable
+          style={[styles.boton, { backgroundColor: theme.backgroundSelected }]}
+          onPress={pedirPermiso}
+        >
+          <ThemedText style={styles.botonTexto}>Dar permiso</ThemedText>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <CameraView
@@ -86,75 +109,103 @@ export default function Escanear() {
       />
 
       {credencial && (
-        <View style={styles.resultado}>
-          <ThemedText type="subtitle">Credencial válida ✅</ThemedText>
-          <ThemedText>Nombre: {credencial.nombre}</ThemedText>
-          <ThemedText>Documento: {credencial.documento}</ThemedText>
+        <ThemedView
+          style={[
+            styles.resultado,
+            { backgroundColor: theme.backgroundElement },
+          ]}
+        >
+          <ScrollView contentContainerStyle={{ gap: 10 }}>
+            <ThemedText type="subtitle">Credencial válida</ThemedText>
+            <ThemedText>Nombre: {credencial.nombre}</ThemedText>
+            <ThemedText>Documento: {credencial.documento}</ThemedText>
 
-          {/* Estados de guardado: uno solo, aquí dentro */}
-          {guardado ? (
-            <>
-              <ThemedText style={{ color: "lightgreen" }}>
-                Guardada 🔒
-              </ThemedText>
-              <ThemedText style={{ fontSize: 11, opacity: 0.7 }}>
-                Así se guarda (cifrado):
-              </ThemedText>
-              <ThemedText
-                selectable
-                style={{ fontSize: 10, fontFamily: "monospace" }}
+            {guardado ? (
+              <>
+                <ThemedText style={{ color: "#4A7C59", fontWeight: "600" }}>
+                  Guardada 🔒
+                </ThemedText>
+                <ThemedText style={{ fontSize: 11, opacity: 0.7 }}>
+                  Así se guarda (cifrado):
+                </ThemedText>
+                <ThemedText
+                  selectable
+                  style={{ fontSize: 10, fontFamily: "monospace" }}
+                >
+                  {textoCifrado}
+                </ThemedText>
+              </>
+            ) : pidiendoPin ? (
+              <>
+                <ThemedText>Ingresa tu PIN para guardar:</ThemedText>
+                <TextInput
+                  value={pinTemporal}
+                  onChangeText={setPinTemporal}
+                  keyboardType="numeric"
+                  secureTextEntry
+                  maxLength={6}
+                  placeholder="PIN"
+                  placeholderTextColor={theme.textSecondary}
+                  style={[
+                    styles.inputPin,
+                    {
+                      color: theme.text,
+                      borderColor: theme.backgroundSelected,
+                    },
+                  ]}
+                />
+                {error !== "" && (
+                  <ThemedText style={styles.error}>{error}</ThemedText>
+                )}
+                <Pressable
+                  style={[
+                    styles.boton,
+                    { backgroundColor: theme.backgroundSelected },
+                  ]}
+                  onPress={confirmarPinTemporal}
+                >
+                  <ThemedText style={styles.botonTexto}>Confirmar</ThemedText>
+                </Pressable>
+              </>
+            ) : (
+              <Pressable
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.backgroundSelected },
+                ]}
+                onPress={guardarCredencial}
               >
-                {textoCifrado}
-              </ThemedText>
-            </>
-          ) : pidiendoPin ? (
-            <>
-              <ThemedText>Ingresa tu PIN para guardar:</ThemedText>
-              <TextInput
-                value={pinTemporal}
-                onChangeText={setPinTemporal}
-                keyboardType="numeric"
-                secureTextEntry
-                maxLength={6}
-                placeholder="PIN"
-                placeholderTextColor="#888"
-                style={styles.inputPin}
-              />
-              {error !== "" && (
-                <ThemedText style={{ color: "red" }}>{error}</ThemedText>
-              )}
-              <Button title="Confirmar" onPress={confirmarPinTemporal} />
-            </>
-          ) : (
-            <Button title="Guardar credencial" onPress={guardarCredencial} />
-          )}
+                <ThemedText style={styles.botonTexto}>
+                  Guardar credencial
+                </ThemedText>
+              </Pressable>
+            )}
 
-          <Button
-            title="Escanear otro"
-            onPress={() => {
-              setEscaneado(false);
-              setCredencial(null);
-              setError("");
-              setGuardado(false);
-              setPidiendoPin(false);
-              setPinTemporal("");
-            }}
-          />
-        </View>
+            <Pressable
+              style={[styles.boton, styles.botonSecundario]}
+              onPress={reiniciar}
+            >
+              <ThemedText style={styles.botonTexto}>Escanear otro</ThemedText>
+            </Pressable>
+          </ScrollView>
+        </ThemedView>
       )}
 
-      {/* Error cuando NO hay credencial (QR inválido) */}
       {!credencial && error !== "" && (
-        <View style={styles.resultado}>
-          <ThemedText style={{ color: "red" }}>{error}</ThemedText>
-          <Button
-            title="Escanear otro"
-            onPress={() => {
-              setEscaneado(false);
-              setError("");
-            }}
-          />
-        </View>
+        <ThemedView
+          style={[
+            styles.resultado,
+            { backgroundColor: theme.backgroundElement },
+          ]}
+        >
+          <ThemedText style={styles.error}>{error}</ThemedText>
+          <Pressable
+            style={[styles.boton, styles.botonSecundario]}
+            onPress={reiniciar}
+          >
+            <ThemedText style={styles.botonTexto}>Escanear otro</ThemedText>
+          </Pressable>
+        </ThemedView>
       )}
     </View>
   );
@@ -170,22 +221,37 @@ const styles = StyleSheet.create({
   },
   resultado: {
     position: "absolute",
-    bottom: 30,
+    bottom: 20,
     left: 20,
     right: 20,
+    maxHeight: "60%",
     padding: 20,
-    backgroundColor: "rgba(78, 63, 34, 1)",
     borderRadius: 12,
-    gap: 12,
+    gap: 10,
   },
   inputPin: {
     borderWidth: 1,
-    borderColor: "#888",
-    color: "white",
     padding: 10,
     width: 140,
     textAlign: "center",
     fontSize: 18,
     borderRadius: 8,
+    alignSelf: "center",
+  },
+  boton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  botonSecundario: {
+    backgroundColor: "#6F4E37",
+  },
+  botonTexto: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  error: {
+    color: "#B00020",
   },
 });

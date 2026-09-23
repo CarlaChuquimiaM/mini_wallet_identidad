@@ -1,10 +1,11 @@
-import { Button, StyleSheet, TextInput } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { useSession } from "@/context/SessionContext";
+import { useTheme } from "@/hooks/use-theme";
 import { leerIdentidad } from "@/lib/almacenIdentidad";
 import { verificarPin } from "@/lib/pin";
 import { crearWalletSiNoExiste } from "@/lib/wallet";
@@ -12,18 +13,16 @@ import { useEffect, useState } from "react";
 
 export default function HomeScreen() {
   const [direccion, setDireccion] = useState<string | null>(null);
-
-  const { pin } = useSession();
+  const { pin, salir } = useSession();
   const [datos, setDatos] = useState<any>(null);
   const [error, setError] = useState("");
   const [pidiendoPin, setPidiendoPin] = useState(false);
   const [pinTemporal, setPinTemporal] = useState("");
+  const theme = useTheme();
 
   useEffect(() => {
     crearWalletSiNoExiste().then(setDireccion);
   }, []);
-
-  const { salir } = useSession();
 
   const verDatos = async (pinAUsar: string) => {
     try {
@@ -58,20 +57,27 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <ThemedText type="subtitle">Tu dirección:</ThemedText>
-          <ThemedText selectable>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.contenedor}>
+        <ThemedText type="title" style={styles.titulo}>
+          Mi Wallet
+        </ThemedText>
+
+        <ThemedView
+          style={[styles.tarjeta, { backgroundColor: theme.backgroundElement }]}
+        >
+          <ThemedText type="subtitle">Tu dirección</ThemedText>
+          <ThemedText selectable style={styles.direccion}>
             {direccion ?? "Generando wallet..."}
           </ThemedText>
         </ThemedView>
 
-        {/* Sección: ver datos de identidad guardados */}
-        <ThemedView style={styles.seccionDatos}>
+        <ThemedView
+          style={[styles.tarjeta, { backgroundColor: theme.backgroundElement }]}
+        >
           {datos ? (
             <>
-              <ThemedText type="subtitle">Datos:</ThemedText>
+              <ThemedText type="subtitle">Mis datos</ThemedText>
               <ThemedText>Nombre: {datos.nombre}</ThemedText>
               <ThemedText>Documento: {datos.documento}</ThemedText>
               <ThemedText>Tipo: {datos.tipo}</ThemedText>
@@ -87,74 +93,98 @@ export default function HomeScreen() {
                 secureTextEntry
                 maxLength={6}
                 placeholder="PIN"
-                placeholderTextColor="#888"
-                style={styles.inputPin}
+                placeholderTextColor={theme.textSecondary}
+                style={[
+                  styles.inputPin,
+                  { color: theme.text, borderColor: theme.backgroundSelected },
+                ]}
               />
-              <Button title="Confirmar" onPress={confirmarPin} />
+              <Pressable
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.backgroundSelected },
+                ]}
+                onPress={confirmarPin}
+              >
+                <ThemedText style={styles.botonTexto}>Confirmar</ThemedText>
+              </Pressable>
             </>
           ) : (
-            <Button title="Ver mis datos" onPress={manejarVerDatos} />
+            <Pressable
+              style={[
+                styles.boton,
+                { backgroundColor: theme.backgroundSelected },
+              ]}
+              onPress={manejarVerDatos}
+            >
+              <ThemedText style={styles.botonTexto}>Ver mis datos</ThemedText>
+            </Pressable>
           )}
 
           {error !== "" && (
-            <ThemedText style={{ color: "red" }}>{error}</ThemedText>
+            <ThemedText style={styles.error}>{error}</ThemedText>
           )}
         </ThemedView>
 
-        <Button title="Salir" onPress={salir} />
-      </SafeAreaView>
-    </ThemedView>
+        <Pressable style={[styles.boton, styles.botonSalir]} onPress={salir}>
+          <ThemedText style={[styles.botonTexto, { color: "#fff" }]}>
+            Salir
+          </ThemedText>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  contenedor: {
+    flexGrow: 1,
     alignItems: "center",
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     gap: Spacing.four,
+    padding: Spacing.four,
+    paddingBottom: Spacing.six,
   },
-  title: {
-    textAlign: "center",
+  titulo: {
+    marginTop: Spacing.three,
   },
-  code: {
-    textTransform: "uppercase",
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: "stretch",
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-  seccionDatos: {
-    marginTop: 24,
-    gap: 8,
-    paddingHorizontal: 20,
+  tarjeta: {
+    width: "100%",
+    maxWidth: 600,
+    padding: Spacing.two,
+    borderRadius: 16,
+    gap: Spacing.two,
     alignItems: "center",
+  },
+  direccion: {
+    fontSize: 13,
+    textAlign: "center",
   },
   inputPin: {
     borderWidth: 1,
-    borderColor: "#888",
-    color: "white",
-    padding: 10,
-    width: 140,
+    padding: 12,
+    width: 160,
     textAlign: "center",
     fontSize: 18,
-    borderRadius: 8,
+    borderRadius: 10,
+    marginVertical: Spacing.two,
+  },
+  boton: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    minWidth: 180,
+  },
+  botonSalir: {
+    backgroundColor: "#6F4E37",
+    position: "static",
+  },
+  botonTexto: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  error: {
+    color: "#B00020",
+    marginTop: Spacing.two,
   },
 });
